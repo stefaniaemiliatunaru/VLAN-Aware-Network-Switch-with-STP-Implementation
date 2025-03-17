@@ -1,0 +1,26 @@
+Procesul de comuntare
+La primirea unui frame, se actualizeaza tabela MAC prin retinerea adresei MAC sursa si a interfetei de pe care a venit frame-ul.
+Daca adresa destinatie este de tip unicast, verific daca aceasta a fost retinuta anterior in tabela MAC, caz in care pot accesa direct interfata respectiva.
+Folosind functia send_to link trimit frame-ul pe interfata corespunzatoare fara alte modificari.
+Daca adresa destinatie nu a fost retinuta anterior in tabela MAC, trimit frame-ul pe toate interfetele, cu exceptia celei de pe care a venit.
+Daca adresa destinatie este de tip broadcast, trimit frame-ul pe toate interfetele, cu exceptia celei de pe care a venit, urmand pasii descrisi anterior.
+
+VLAN
+Citesc configuratia switch-ului din fisierul corespunzator si o salvez in variabila switch_config folosind functia read_switch_configs.
+In functia read_switch_configs, fiecare switch este citit reprezentand un dictionar unde ii sunt retinute prioritatea si interfetele, iar fiecare interfata reprezenta un dictionar unde ii sunt retinute tipul sau VLAN-ul, dupa caz.
+In main verific daca VLAN ID-u switch-ului nu a fost setat inca, caz in care il obtin din configuratia switch-ului.
+La primirea unui frame, se patreaza functionalitatile de la task 1, dar la acestea se adauga si verificarea tipului de transfer.
+Astfel, verific tipul transferului (trunk-trunk, trunk-access, access-trunk, access-access) si trimit frame-ul pe interfata corespunzatoare, avand in vedere daca trebuie sa adaug sau sa elimin tag-ul VLAN, sau sa trimit frame-ul fara alte modificari.
+
+STP
+Pentru task 3 se pastreaza functionalitatile anteriaore ale codului, dar se adauga si functionalitatile STP.
+Astfel, in main am adaugat intializarea variabilelor pentru STP, folosind functia intiliaze_interfaces_for_bpdu.
+In aceasta functie, am urmat pseudocodul prezentat in cerinta, retinand starile interfetelor intr-un dictionar.
+Am setat toate interfetele de tip trunk la BLOCKING, iar pe cele de tip access la DESIGNATED, apoi am actualizat configuratia switch-ului.
+Daca portul devine root bridge, ii setez porturile la DESIGNATED.
+In continuare, am adaugat in main verificarea daca destinatia este de tip multicast BPDU, iar in cazul interfata pe care se doreste transmiterea frame-ului nu este blocata, o primesc si o pocesez folosind functia receive_and_process_bpdu.
+In cadrul acesei functii, am implementat si am adaptat pseudocodul din cerinta, am extras campurile necesare din configuratia unui frme BPDU.
+Verific daca root bridge ID-ul din BPDU este mai mic decât cel curent, caz in care actualizez root bridge-ul, costul drumului si starea interfetelor.
+Daca root bridge ID-ul din BPDU este egal cu cel curent, analizez costul drumului si verific daca trebuie sa actualizez starea interfetelor.
+Daca BPDU provine de la propriul switch, interfata se setează la BLOCKING.
+Iar daca switch-ul curent este root bridge, toate porturile se seteaza la DESIGNATED.
